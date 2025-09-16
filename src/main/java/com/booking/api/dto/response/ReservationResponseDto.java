@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,8 +19,8 @@ public class ReservationResponseDto {
     private String vehicleName;
     private ReservationStatus status;
     private BigDecimal price;
-    private Instant startTime;
-    private Instant endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private Instant createdAt;
     private Instant updatedAt;
 }

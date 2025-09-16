@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -32,8 +33,8 @@ public class Reservation {
     private ReservationStatus status = ReservationStatus.PENDING;
 
     private BigDecimal price;
-    private Instant startTime;
-    private Instant endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
 
     private Instant createdAt = Instant.now();
