@@ -3,11 +3,14 @@ package com.booking.api.service.impl;
 import com.booking.api.Repository.ReservationRepository;
 import com.booking.api.Repository.UserRepository;
 import com.booking.api.Repository.VehicleRepository;
+import com.booking.api.dto.request.ReservationRequestDto;
+import com.booking.api.dto.response.ReservationResponseDto;
 import com.booking.api.entity.Reservation;
 import com.booking.api.entity.User;
 import com.booking.api.entity.Vehicle;
 import com.booking.api.entity.enums.ReservationStatus;
 import com.booking.api.service.ReservationService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,34 +29,49 @@ public class ReservationServiceImpl implements ReservationService {
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
     private final ReservationRepository reservationRepository;
+    private final ModelMapper modelMapper;
 
-    public ReservationServiceImpl(UserRepository userRepository, VehicleRepository vehicleRepository, ReservationRepository reservationRepository) {
+    public ReservationServiceImpl(UserRepository userRepository, VehicleRepository vehicleRepository, ReservationRepository reservationRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.vehicleRepository = vehicleRepository;
         this.reservationRepository = reservationRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public Reservation createReservation(Reservation reservation,Authentication authentication) {
+    public ReservationResponseDto createReservation(ReservationRequestDto dto, Authentication authentication) {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Vehicle vehicle = vehicleRepository.findById(reservation.getVehicle().getId())
+        Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
 
+        Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setVehicle(vehicle);
+        if(dto.getPrice() != null) {
+            reservation.setPrice(dto.getPrice());
+        }
         reservation.setCreatedAt(Instant.now());
         reservation.setUpdatedAt(Instant.now());
+        if (dto.getStartTime() != null) {
+            reservation.setStartTime(dto.getStartTime());
+        }
+        if (dto.getEndTime() != null) {
+            reservation.setEndTime(dto.getEndTime());
+        }
+        reservationRepository.save(reservation);
 
-        return reservationRepository.save(reservation);    }
+        return modelMapper.map(reservation, ReservationResponseDto.class);
+    }
 
     @Override
-    public Reservation updateReservation(Long id,Reservation updatedReservation,Authentication authentication) {
-        Reservation reservation = getReservationById(id, authentication);
+    public ReservationResponseDto updateReservation(Long id, ReservationRequestDto updatedReservation, Authentication authentication) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
@@ -64,8 +82,8 @@ public class ReservationServiceImpl implements ReservationService {
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
-        if (updatedReservation.getVehicle() != null) {
-            Vehicle vehicle = vehicleRepository.findById(updatedReservation.getVehicle().getId())
+        if (updatedReservation.getVehicleId() != null) {
+            Vehicle vehicle = vehicleRepository.findById(updatedReservation.getVehicleId())
                     .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
             reservation.setVehicle(vehicle);
         }
@@ -83,12 +101,16 @@ public class ReservationServiceImpl implements ReservationService {
             reservation.setEndTime(updatedReservation.getEndTime());
 
         reservation.setUpdatedAt(Instant.now());
-        return reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
+
+        return modelMapper.map(reservation, ReservationResponseDto.class);
     }
 
     @Override
     public void deleteReservation(Long id, Authentication authentication) {
-        Reservation reservation = getReservationById(id, authentication);
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        ;
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
@@ -103,7 +125,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Page<Reservation> getAllReservations(Authentication authentication, ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sortBy, String sortDir) {
+    public Page<ReservationResponseDto> getAllReservations(Authentication authentication, ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sortBy, String sortDir) {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
 
@@ -117,20 +139,37 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (isAdmin) {
             if (status != null && minPrice != null && maxPrice != null) {
-                return reservationRepository.findByStatusAndPriceBetween(status, minPrice, maxPrice, pageable);
+                Page<Reservation> reservationPages =  reservationRepository.findByStatusAndPriceBetween(status, minPrice, maxPrice, pageable);
+                Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
+                        modelMapper.map(reservation, ReservationResponseDto.class)
+                );
+                return dtoPage;
             } else {
-                return reservationRepository.findAll(pageable);
+                Page<Reservation> reservationPages =  reservationRepository.findAll(pageable);
+                Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
+                        modelMapper.map(reservation, ReservationResponseDto.class)
+                );
+                return dtoPage;
             }
         } else {
             if (status != null && minPrice != null && maxPrice != null) {
-                return reservationRepository.findByUserAndStatusAndPriceBetween(user, status, minPrice, maxPrice, pageable);
+                Page<Reservation> reservationPages =  reservationRepository.findByUserAndStatusAndPriceBetween(user, status, minPrice, maxPrice, pageable);
+                Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
+                        modelMapper.map(reservation, ReservationResponseDto.class)
+                );
+                return dtoPage;
             } else {
-                return reservationRepository.findByUser(user, pageable);
+                Page<Reservation> reservationPages =  reservationRepository.findByUser(user, pageable);
+                Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
+                        modelMapper.map(reservation, ReservationResponseDto.class)
+                );
+                return dtoPage;
             }
-        }    }
+        }
+    }
 
     @Override
-    public Reservation getReservationById(Long id,Authentication authentication) {
+    public ReservationResponseDto getReservationById(Long id, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
@@ -143,6 +182,6 @@ public class ReservationServiceImpl implements ReservationService {
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
-        return reservation;
+        return modelMapper.map(reservation,ReservationResponseDto.class);
     }
 }

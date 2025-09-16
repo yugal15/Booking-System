@@ -1,5 +1,7 @@
 package com.booking.api.controller;
 
+import com.booking.api.dto.request.ReservationRequestDto;
+import com.booking.api.dto.response.ReservationResponseDto;
 import com.booking.api.entity.Reservation;
 import com.booking.api.entity.enums.ReservationStatus;
 import com.booking.api.service.ReservationService;
@@ -20,7 +22,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<Page<Reservation>> getAll(
+    public ResponseEntity<Page<ReservationResponseDto>> getAll(
             Authentication authentication,
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -34,17 +36,17 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Reservation> getById(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<ReservationResponseDto> getById(@PathVariable Long id, Authentication authentication) {
         return ResponseEntity.ok(reservationService.getReservationById(id, authentication));
     }
 
     @PostMapping
-    public ResponseEntity<Reservation> create(@RequestBody Reservation reservation, Authentication authentication) {
+    public ResponseEntity<ReservationResponseDto> create(@RequestBody ReservationRequestDto reservation, Authentication authentication) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.createReservation(reservation, authentication));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reservation> update(@PathVariable Long id, @RequestBody Reservation reservation, Authentication authentication) {
+    public ResponseEntity<ReservationResponseDto> update(@PathVariable Long id, @RequestBody ReservationRequestDto reservation, Authentication authentication) {
         return ResponseEntity.ok(reservationService.updateReservation(id, reservation, authentication));
     }
 

@@ -11,10 +11,9 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationDto {
+public class ReservationResponseDto {
     private Long id;
     private Long userId;
-    private String username;
     private Long vehicleId;
     private String vehicleName;
     private ReservationStatus status;
