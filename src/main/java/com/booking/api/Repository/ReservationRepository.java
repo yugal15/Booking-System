@@ -18,6 +18,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Page<Reservation> findByUser(User user, Pageable pageable);
 
+    Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
+
+
     Page<Reservation> findByStatusAndPriceBetween(ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
 
     Page<Reservation> findByUserAndStatusAndPriceBetween(User user, ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
