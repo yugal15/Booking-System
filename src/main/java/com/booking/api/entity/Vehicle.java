@@ -24,5 +24,5 @@ public class Vehicle {
     private String type;
     private String description;
     private Integer capacity;
-    private boolean active = true;
+    private Boolean active = true;
 }

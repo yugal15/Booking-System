@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface VehicleService {
     Vehicle createVehicle(Vehicle vehicle);
-    Vehicle updateVehicle(Vehicle vehicle);
+    Vehicle updateVehicle(Long Id,Vehicle vehicle);
     void deleteVehicle(Long id);
-    Optional<Vehicle> getVehicleById(Long id);
+    Vehicle getVehicleById(Long id);
     Page<Vehicle> getAllVehicles(Pageable pageable);
 }

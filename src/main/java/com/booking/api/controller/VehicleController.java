@@ -17,7 +17,6 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-    // List all vehicles (paginated)
     @GetMapping
     public Page<Vehicle> getAllVehicles(Pageable pageable) {
         return vehicleService.getAllVehicles(pageable);
@@ -25,7 +24,7 @@ public class VehicleController {
 
     // Get vehicle by id
     @GetMapping("/{id}")
-    public Optional<Vehicle> getVehicleById(@PathVariable Long id) {
+    public Vehicle getVehicleById(@PathVariable Long id) {
         return vehicleService.getVehicleById(id);
     }
 
@@ -40,7 +39,7 @@ public class VehicleController {
     @PutMapping("/{id}")
     public Vehicle updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicle) {
         vehicle.setId(id);
-        return vehicleService.updateVehicle(vehicle);
+        return vehicleService.updateVehicle(id,vehicle);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

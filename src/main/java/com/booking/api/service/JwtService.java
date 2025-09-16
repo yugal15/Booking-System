@@ -83,21 +83,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateRefresh(Map<String, Objects> extraClaims, UserDetails userDetails) {
-        return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-
-    }
-
-    public String getEmailFromToken(String token) {
-        return extractUserName(token);
-    }
-
     public Boolean validateToken(String token) {
         String userName = extractUserName(token);//todo extract userEmail from jwt Token
         if (StringUtils.isNotEmpty(userName) && !isTokenExpired(token)) {

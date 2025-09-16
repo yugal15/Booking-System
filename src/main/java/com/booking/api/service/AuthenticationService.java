@@ -24,7 +24,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
         var user = User.builder()
-                .username(registerRequest.getUsername()) // ✅ add this
+                .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(Role.USER)
                 .enabled(true)
@@ -33,11 +33,9 @@ public class AuthenticationService {
         userRepository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefresh(new HashMap<>(), user);
 
         return AuthenticationResponse.builder()
                 .authenticationToken(jwtToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -48,21 +46,8 @@ public class AuthenticationService {
         );
         var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
         var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefresh(new HashMap<>(), user);
         return AuthenticationResponse.builder()
                 .authenticationToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
-
-    public AuthenticationResponse refreshToken(String refreshToken) {
-
-        var user = userRepository.findByUsername(jwtService.getEmailFromToken(refreshToken)).orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
-        var jwtToken = jwtService.generateToken(user);
-        var newRefreshToken = jwtService.generateRefresh(new HashMap<>(), user);
-        return AuthenticationResponse.builder()
-                .authenticationToken(jwtToken)
-                .refreshToken(newRefreshToken)
                 .build();
     }
 

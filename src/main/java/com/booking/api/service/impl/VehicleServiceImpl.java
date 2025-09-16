@@ -23,8 +23,18 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Vehicle updateVehicle(Vehicle vehicle) {
-        return vehicleRepository.save(vehicle);
+    public Vehicle updateVehicle(Long id,Vehicle vehicle) {
+        Vehicle v = vehicleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+        v.setName(vehicle.getName());
+        v.setType(vehicle.getType());
+        v.setDescription(vehicle.getDescription());
+        v.setCapacity(vehicle.getCapacity());
+
+        if (vehicle.getActive() != null) {
+            v.setActive(vehicle.getActive());
+        }
+        return vehicleRepository.save(v);
     }
 
     @Override
@@ -33,8 +43,9 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Optional<Vehicle> getVehicleById(Long id) {
-        return vehicleRepository.findById(id);
+    public Vehicle getVehicleById(Long id) {
+        return vehicleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
     }
 
     @Override
