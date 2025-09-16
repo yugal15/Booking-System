@@ -44,15 +44,15 @@ public class ReservationServiceImpl implements ReservationService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : " + userDetails.getUsername()));
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID : " + dto.getVehicleId()));
 
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setVehicle(vehicle);
-        if(dto.getPrice() != null) {
+        if (dto.getPrice() != null) {
             reservation.setPrice(dto.getPrice());
         }
         reservation.setCreatedAt(Instant.now());
@@ -71,11 +71,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto updateReservation(Long id, ReservationRequestDto updatedReservation, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : " + id));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : " + userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
@@ -84,7 +84,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (updatedReservation.getVehicleId() != null) {
             Vehicle vehicle = vehicleRepository.findById(updatedReservation.getVehicleId())
-                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id : "+id));
+                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id : " + id));
             reservation.setVehicle(vehicle);
         }
 
@@ -109,12 +109,12 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void deleteReservation(Long id, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : " + id));
         ;
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : " + userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
@@ -133,19 +133,25 @@ public class ReservationServiceImpl implements ReservationService {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : " + userDetails.getUsername()));
 
         boolean isAdmin = user.getRole().name().equals("ADMIN");
 
         if (isAdmin) {
             if (status != null && minPrice != null && maxPrice != null) {
-                Page<Reservation> reservationPages =  reservationRepository.findByStatusAndPriceBetween(status, minPrice, maxPrice, pageable);
+                Page<Reservation> reservationPages = reservationRepository.findByStatusAndPriceBetween(status, minPrice, maxPrice, pageable);
+                Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
+                        modelMapper.map(reservation, ReservationResponseDto.class)
+                );
+                return dtoPage;
+            } else if (status != null) {
+                Page<Reservation> reservationPages = reservationRepository.findByStatus(status, pageable);
                 Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
                         modelMapper.map(reservation, ReservationResponseDto.class)
                 );
                 return dtoPage;
             } else {
-                Page<Reservation> reservationPages =  reservationRepository.findAll(pageable);
+                Page<Reservation> reservationPages = reservationRepository.findAll(pageable);
                 Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
                         modelMapper.map(reservation, ReservationResponseDto.class)
                 );
@@ -153,13 +159,13 @@ public class ReservationServiceImpl implements ReservationService {
             }
         } else {
             if (status != null && minPrice != null && maxPrice != null) {
-                Page<Reservation> reservationPages =  reservationRepository.findByUserAndStatusAndPriceBetween(user, status, minPrice, maxPrice, pageable);
+                Page<Reservation> reservationPages = reservationRepository.findByUserAndStatusAndPriceBetween(user, status, minPrice, maxPrice, pageable);
                 Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
                         modelMapper.map(reservation, ReservationResponseDto.class)
                 );
                 return dtoPage;
             } else {
-                Page<Reservation> reservationPages =  reservationRepository.findByUser(user, pageable);
+                Page<Reservation> reservationPages = reservationRepository.findByUser(user, pageable);
                 Page<ReservationResponseDto> dtoPage = reservationPages.map(reservation ->
                         modelMapper.map(reservation, ReservationResponseDto.class)
                 );
@@ -171,17 +177,17 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto getReservationById(Long id, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : " + id));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : " + userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
-        return modelMapper.map(reservation,ReservationResponseDto.class);
+        return modelMapper.map(reservation, ReservationResponseDto.class);
     }
 }

@@ -32,8 +32,15 @@ public class ReservationController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return ResponseEntity.ok(reservationService.getAllReservations(authentication, status, minPrice, maxPrice, page, size, sortBy, sortDir));
+        Page<ReservationResponseDto> reservations = reservationService.getAllReservations(authentication, status, minPrice, maxPrice, page, size, sortBy, sortDir);
+
+        if (reservations.isEmpty()) {
+            throw new IllegalArgumentException("No reservations found for the given criteria");
+        }
+
+        return ResponseEntity.ok(reservations);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponseDto> getById(@PathVariable Long id, Authentication authentication) {
