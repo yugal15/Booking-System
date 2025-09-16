@@ -25,7 +25,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Vehicle updateVehicle(Long id,Vehicle vehicle) {
         Vehicle v = vehicleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id : "+id));
         v.setName(vehicle.getName());
         v.setType(vehicle.getType());
         v.setDescription(vehicle.getDescription());
@@ -45,7 +45,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Vehicle getVehicleById(Long id) {
         return vehicleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id : "+id));
     }
 
     @Override

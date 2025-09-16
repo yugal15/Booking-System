@@ -71,20 +71,20 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto updateReservation(Long id, ReservationRequestDto updatedReservation, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Access denied");
+            throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
         if (updatedReservation.getVehicleId() != null) {
             Vehicle vehicle = vehicleRepository.findById(updatedReservation.getVehicleId())
-                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id : "+id));
             reservation.setVehicle(vehicle);
         }
 
@@ -109,15 +109,15 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void deleteReservation(Long id, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
         ;
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Access denied");
+            throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
@@ -133,7 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
 
         boolean isAdmin = user.getRole().name().equals("ADMIN");
 
@@ -171,14 +171,14 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto getReservationById(Long id, Authentication authentication) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID : "+id));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username : "+userDetails.getUsername()));
 
         if (!user.getRole().name().equals("ADMIN") && !reservation.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Access denied");
+            throw new IllegalArgumentException("Access denied  : User doesn't own the reservation");
             //here we are throwing error because user is neither ADMIN and Not own the reservation   ---- author Yugal Wani
         }
 
