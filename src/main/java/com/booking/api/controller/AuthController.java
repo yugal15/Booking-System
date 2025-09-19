@@ -19,13 +19,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) {
-        try {
+
             AuthenticationResponse res = authenticationService.register(registerRequest);
             return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            e.printStackTrace(); // or use logger.error("Error in register", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
 
     }
 

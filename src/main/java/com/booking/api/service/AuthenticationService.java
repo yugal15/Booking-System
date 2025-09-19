@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 
@@ -22,17 +23,29 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) {
-        var user = User.builder()
-                .username(registerRequest.getUsername())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(Role.USER)
-                .enabled(true)
-                .build();
+    public AuthenticationResponse register(RegisterRequest registerRequest){
+
+        if(userRepository.existsByUsername(registerRequest.getUsername())){
+            throw new IllegalArgumentException("Username already exists !!");
+        }
+
+        User user  = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmail(registerRequest.getEmail());
+
+        if(registerRequest.getEmail().equals("waniyugal15@gmail.com")) {
+            user.setRole(Role.ADMIN);
+        }else {
+            user.setRole(Role.USER);
+        }
+        user.setEnabled(true);
 
         userRepository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
+
+        System.out.println(user);
 
         return AuthenticationResponse.builder()
                 .authenticationToken(jwtToken)

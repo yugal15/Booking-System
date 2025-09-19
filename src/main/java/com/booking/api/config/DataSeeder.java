@@ -20,6 +20,7 @@ public class DataSeeder {
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole(Role.ADMIN);
                 admin.setEnabled(true);
+                admin.setEmail("admin@gmail.com");
                 userRepository.save(admin);
             }
 
@@ -29,6 +30,7 @@ public class DataSeeder {
                 user.setPassword(passwordEncoder.encode("user123"));
                 user.setRole(Role.USER);
                 user.setEnabled(true);
+                user.setEmail("user@gmail.com");
                 userRepository.save(user);
             }
         };

@@ -1,5 +1,6 @@
 package com.booking.api.dto.request;
 
+import com.booking.api.entity.enums.Role;
 import lombok.*;
 
 @Data
@@ -9,4 +10,6 @@ import lombok.*;
 public class RegisterRequest {
     private String username;
     private String password;
+    private Role role;
+    private String email;
 }
